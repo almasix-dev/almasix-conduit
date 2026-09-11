@@ -9,14 +9,14 @@ import secrets
 import uuid
 from typing import Any
 
-from starlette.responses import JSONResponse
-
-from almasix.conduit.component import Component
-from almasix.conduit.manager import Conduit
 from almasix.config import config
 from almasix.http.request import Request
 from almasix.prism.helpers import render
 from almasix.validation.form_request import ValidationException
+from starlette.responses import JSONResponse
+
+from almasix.conduit.component import Component
+from almasix.conduit.manager import Conduit
 
 
 def _cfg(key: str, default: Any = None) -> Any:
@@ -78,18 +78,12 @@ def render_html(component: Component, *, island: str | None = None) -> str:
     if not component.should_render():
         return ""
     component.rendering()
-    if island:
-        view = component.render_island(island) or component.render()
-    else:
-        view = component.render()
+    view = component.render_island(island) or component.render() if island else component.render()
     ctx = component.get_public_properties()
     ctx["errors"] = component.get_error_bag()
     ctx["this"] = component
     # Single-file style: ``render()`` may return raw HTML instead of a view name.
-    if isinstance(view, str) and view.lstrip().startswith("<"):
-        html = view
-    else:
-        html = render(view, ctx)
+    html = view if isinstance(view, str) and view.lstrip().startswith("<") else render(view, ctx)
     return component.rendered(html)
 
 
@@ -302,8 +296,9 @@ def conduit_public_paths() -> dict[str, str]:
     The update endpoint is **relatively signed** (HMAC + expiry) on the internal
     path ``/conduit/update``; ``APP_BASE_PATH`` is prefixed only for the browser.
     """
-    from almasix.conduit.signing import public_signed_update_url
     from almasix.routing.url import url
+
+    from almasix.conduit.signing import public_signed_update_url
 
     asset_cfg = str(_cfg("conduit.asset_url", "/conduit/conduit.js") or "/conduit/conduit.js")
     upload_cfg = "/conduit/upload"

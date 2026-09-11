@@ -93,9 +93,10 @@ def test_store_upload(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_public_paths_honor_app_base_path() -> None:
     """Livewire-class bug: hardcoded /conduit breaks under /my-app. We never do that."""
-    from almasix.conduit.mechanism import conduit_assets_script, conduit_public_paths
     from almasix.config import ConfigRepository, set_repository
     from almasix.routing.signing import has_valid_signature
+
+    from almasix.conduit.mechanism import conduit_assets_script, conduit_public_paths
 
     repo = ConfigRepository()
     repo.set("app.url", "http://example.test")
@@ -122,9 +123,10 @@ def test_public_paths_honor_app_base_path() -> None:
 
 
 def test_public_paths_root_hosting() -> None:
-    from almasix.conduit.mechanism import conduit_public_paths
     from almasix.config import ConfigRepository, set_repository
     from almasix.routing.signing import has_valid_signature
+
+    from almasix.conduit.mechanism import conduit_public_paths
 
     repo = ConfigRepository()
     repo.set("app.url", "http://example.test")
