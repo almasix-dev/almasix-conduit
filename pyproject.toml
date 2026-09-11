@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "almasix-conduit"
+version = "0.1.0"
+description = "Livewire-parity reactive components for Almasix (almasix.conduit)"
+requires-python = ">=3.11"
+dependencies = [
+    "almasix>=0.6.0",
+]
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Almasix Contributors" }]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.27.0",
+    "ruff==0.16.6",
+]
+
+[project.entry-points."almasix.providers"]
+conduit = "almasix.conduit.provider:ConduitServiceProvider"
+
+[project.urls]
+Homepage = "https://github.com/almasix-dev/conduit"
+Repository = "https://github.com/almasix-dev/conduit"
+Documentation = "https://almasix-dev.github.io/almasix/conduit/"
+Issues = "https://github.com/almasix-dev/conduit/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/almasix"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/almasix",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["src"]
+python_files = ["test_*.py", "*_test.py"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
