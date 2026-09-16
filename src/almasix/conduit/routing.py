@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Mapping
 from typing import Any
 
@@ -9,7 +10,14 @@ from almasix.http.response import html
 from almasix.prism.helpers import render
 
 from almasix.conduit.manager import Conduit
-from almasix.conduit.mechanism import embed_component
+from almasix.conduit.mechanism import conduit_assets_script, embed_component
+
+_BOOT_MARKERS = (
+    "conduit/conduit.js",
+    "__CONDUIT__",
+    'name="conduit-endpoint"',
+    "name='conduit-endpoint'",
+)
 
 
 def resolve_component(target: str | type) -> type:
@@ -33,6 +41,18 @@ def resolve_component(target: str | type) -> type:
     return Conduit.registry().resolve(name)
 
 
+def ensure_conduit_assets(body: str) -> str:
+    """Inject Conduit + Alpine scripts when the layout omitted ``@conduitScripts``."""
+    if any(marker in body for marker in _BOOT_MARKERS):
+        return body
+    tags = conduit_assets_script()
+    if re.search(r"</head\s*>", body, flags=re.IGNORECASE):
+        return re.sub(r"</head\s*>", tags + "</head>", body, count=1, flags=re.IGNORECASE)
+    if re.search(r"</body\s*>", body, flags=re.IGNORECASE):
+        return re.sub(r"</body\s*>", tags + "</body>", body, count=1, flags=re.IGNORECASE)
+    return body + tags
+
+
 def mount_full_page(
     component: str | type,
     *,
@@ -54,9 +74,7 @@ def mount_full_page(
                     reg_name = key
                     break
             else:
-                # register under snake of class
-                import re
-
+                # register under kebab of class
                 reg_name = re.sub(r"(?<!^)(?=[A-Z])", "-", cls.__name__).lower()
                 Conduit.register(reg_name, cls)
         except Exception:
@@ -78,10 +96,9 @@ def mount_full_page(
                     "conduit_html": slot,
                 },
             )
+            body = ensure_conduit_assets(str(body))
         except Exception:
             # Minimal shell when the app has no layouts.app
-            from almasix.conduit.mechanism import conduit_assets_script
-
             body = (
                 "<!DOCTYPE html><html><head><meta charset='utf-8'>"
                 f"<title>{title_text}</title>{conduit_assets_script()}</head>"

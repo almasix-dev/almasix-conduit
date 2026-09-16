@@ -68,6 +68,8 @@ class ConduitServiceProvider(ServiceProvider):
         except Exception:  # pragma: no cover
             return
 
+        self._install_conduit_tag_expand()
+
         def conduit_directive(expr: str) -> str:
             return f"__w(context['__conduit_render']({expr}))"
 
@@ -93,3 +95,21 @@ class ConduitServiceProvider(ServiceProvider):
                 context.setdefault("flux_scripts", conduit_assets_script)
 
         engine.composer("*", inject)
+
+    @staticmethod
+    def _install_conduit_tag_expand() -> None:
+        """Expand ``<conduit:*>`` / ``<flux:*>`` before Prism compiles the template."""
+        import almasix.prism.compiler as compiler
+
+        if getattr(compiler.compile_template, "_conduit_ctags", False):
+            return
+
+        from almasix.conduit.ctags import expand_conduit_tags
+
+        original = compiler.compile_template
+
+        def compile_template(source: str, *args: object, **kwargs: object):  # type: ignore[no-untyped-def]
+            return original(expand_conduit_tags(source), *args, **kwargs)
+
+        compile_template._conduit_ctags = True  # type: ignore[attr-defined]
+        compiler.compile_template = compile_template  # type: ignore[assignment]

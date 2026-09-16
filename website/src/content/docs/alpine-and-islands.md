@@ -3,28 +3,29 @@ title: Alpine and islands
 description: Practical Alpine.js + $wire patterns, entanglement, errors, and island-scoped morph updates.
 ---
 
-Conduit and Alpine.js are good friends. Alpine owns little bits of browser-only UI — dropdowns, transitions, focus traps. Conduit owns server state and actions. `$wire` is the handshake.
+Conduit and Alpine.js are good friends. Alpine owns little bits of browser-only UI — dropdowns, transitions, focus traps. Conduit owns server state and actions. **`$conduit`** (and `$wire`) is the handshake.
 
 `@conduitScripts` loads Alpine (CDN by default) and registers the magics. Prefer bundling Alpine yourself in production and pointing `conduit.alpine_cdn` / asset config accordingly — see [Configuration](/configuration/).
 
-## `$wire` in sixty seconds
+## `$conduit` in sixty seconds
 
 Inside a Conduit component root, Alpine can read and write public state and call actions:
 
 ```html title="resources/views/conduit/counter.prism.html"
 <div>
-  <p>Server count: <span x-text="$wire.count"></span></p>
-  <button type="button" @click="$wire.increment()">+</button>
-  <button type="button" @click="$wire.count = 0">Reset</button>
+  <p>Server count: <span x-text="$conduit.count"></span></p>
+  <button type="button" @click="$conduit.increment()">+</button>
+  <button type="button" @click="$conduit.count = 0">Reset</button>
 </div>
 ```
 
+`$wire` is the same proxy — use either name.
+
 | Expression | What happens |
 | --- | --- |
-| `$wire.count` | Read public property from the snapshot memo |
-| `$wire.count = 3` | Optimistic local write + enqueue sync |
-| `$wire.increment()` | Call the server action `increment` |
-| `$wire.increment` without `()` | Still a function — call it |
+| `$conduit.count` / `$wire.count` | Read public property from the snapshot memo |
+| `$conduit.count = 3` | Optimistic local write + enqueue sync |
+| `$conduit.increment()` | Call the server action `increment` |
 
 Property sets update `wire:text` / `wire:show` / `wire:bind:*` **immediately**, then the network request coalesces with siblings.
 
@@ -32,15 +33,15 @@ Property sets update `wire:text` / `wire:show` / `wire:bind:*` **immediately**, 
 
 | API | Role |
 | --- | --- |
-| `$wire` | Proxy to component state + actions |
+| `$conduit` / `$wire` | Proxy to component state + actions (same object) |
 | `$errors` | Validation error bag for this component |
-| `$wire.$set(name, value)` | Set a property and sync |
-| `$wire.$toggle(name)` | Flip a boolean on the server |
-| `$wire.$refresh()` | Re-render without a custom action |
-| `$wire.$dispatch(event, params)` | Fire a browser `CustomEvent` |
-| `$wire.$island(name, opts?)` | Refresh / call scoped to an island |
-| `$wire.$entangle(name)` | Alpine-friendly get/set object for a property |
-| `$wire.$errors` | Same bag as `$errors` |
+| `$conduit.$set(name, value)` | Set a property and sync |
+| `$conduit.$toggle(name)` | Flip a boolean on the server |
+| `$conduit.$refresh()` | Re-render without a custom action |
+| `$conduit.$dispatch(event, params)` | Fire a browser `CustomEvent` |
+| `$conduit.$island(name, opts?)` | Refresh / call scoped to an island |
+| `$conduit.$entangle(name)` | Alpine-friendly get/set object for a property |
+| `$conduit.$errors` | Same bag as `$errors` |
 
 ## Local Alpine state + server state
 

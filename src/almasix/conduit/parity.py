@@ -1,8 +1,6 @@
-"""Livewire 4 → Conduit parity matrix (machine-readable).
+"""Conduit feature matrix (machine-readable).
 
 Statuses: ``complete`` | ``partial`` | ``planned``.
-Exhausted means every row is ``complete``, or a named deviation is documented
-in Starlight **Conduit**.
 """
 
 from __future__ import annotations
@@ -18,9 +16,13 @@ PARITY: dict[str, str] = {
     "request coalescing / batching": "complete",
     "HTML morph (idiomorph-lite)": "complete",
     "Alpine $wire + $errors": "complete",
+    "Alpine $conduit magic (alias of $wire)": "complete",
+    "dual conduit:*/wire:* attribute vocabulary": "complete",
+    "<conduit:> / <flux:> Prism tags": "complete",
     "effects.data client bindings (no roundtrip)": "complete",
     "APP_BASE_PATH / subpath hosting": "complete",
     "nested components (@conduit)": "complete",
+    "Route.conduit() full-page + script safety-net": "complete",
     "validation errors": "complete",
     "events ($dispatch / wire:listen)": "complete",
     "$toggle / $set / $refresh / $js / $entangle": "complete",
@@ -44,7 +46,6 @@ PARITY: dict[str, str] = {
     "wire:navigate + View Transitions": "complete",
     "wire:transition (View Transitions API)": "complete",
     "inline HTML render() (SFC-style)": "complete",
-    "Route.conduit() full-page components": "complete",
     "CSP-safe Alpine mode (conduit.csp_safe)": "complete",
     "WithPagination helpers": "complete",
     "Computed / Locked / On attributes": "complete",

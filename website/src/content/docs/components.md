@@ -199,8 +199,9 @@ Components compose. Embed children from Prism or Python:
 ```html title="resources/views/conduit/settings.prism.html"
 <section>
   <h1>Settings</h1>
-  @conduit('forms.profile', user_id=user_id)
-  @conduit('forms.password')
+  <conduit:forms.profile :user_id="user_id" />
+  <conduit:forms.password />
+  <!-- or @conduit('forms.profile', user_id=user_id) -->
 </section>
 ```
 
@@ -248,10 +249,14 @@ class UsersTable(Component, WithPagination):
 
 ## Inline HTML render
 
-Prefer a view file for anything real, but tiny demos can return HTML from `render()` if your setup supports it — keep the component self-contained while you sketch.
+Prefer a view file for anything real, but tiny demos can return HTML from `render()` if your setup supports it — keep the component self-contained while you sketch. See [Full-page components](/full-page-components/#inline-html-render-sketch-mode) for using that with `Route.conduit`.
 
 ## Full-page components
 
-Mount a component as an entire route with `Route.conduit(...)` (see your Almasix routing helpers). Conduit embeds the component into a layout (or a minimal HTML shell if no layout exists) and still loads `@conduitScripts` for you.
+When the route *is* the component (dashboards, settings, resource screens), use `Route.conduit(...)`.
+
+That’s a major Conduit pattern — layouts, route params → public state, query strings, nesting, islands — covered in full here:
+
+**[Full-page components →](/full-page-components/)**
 
 Next: the [Directives](/directives/) vocabulary, or [Alpine and islands](/alpine-and-islands/) for `$wire` deep-dives.

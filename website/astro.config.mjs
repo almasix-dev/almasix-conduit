@@ -80,7 +80,9 @@ export default defineConfig({
 					items: [
 						{ label: 'Installation', slug: 'installation' },
 						{ label: 'Quick start', slug: 'quick-start' },
+						{ label: 'Embedding', slug: 'embedding' },
 						{ label: 'Components', slug: 'components' },
+						{ label: 'Full-page components', slug: 'full-page-components' },
 						{ label: 'Wire protocol', slug: 'wire-protocol' },
 						{ label: 'Directives', slug: 'directives' },
 						{ label: 'Alpine and islands', slug: 'alpine-and-islands' },

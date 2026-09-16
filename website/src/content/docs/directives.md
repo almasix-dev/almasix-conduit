@@ -3,16 +3,20 @@ title: Directives
 description: The wire:* vocabulary — actions, binding, loading, morph, and navigation — with practical examples.
 ---
 
-Conduit’s HTML vocabulary is `wire:*`. Put attributes on elements inside a component root; the client binds them on boot and after each morph.
+Conduit’s HTML vocabulary is `conduit:*` (preferred) or `wire:*` (fully supported alias). Put attributes on elements inside a component root; the client binds them on boot and after each morph.
+
+:::tip[Dual vocabulary]
+`conduit:click` and `wire:click` do the same thing. Docs use `conduit:` going forward; keep `wire:` if you like the Livewire muscle memory. Alpine exposes both `$conduit` and `$wire`.
+:::
 
 ## Actions
 
 Kick off server methods from the browser.
 
 ```html
-<button type="button" wire:click="increment">+</button>
-<button type="button" wire:click="add(1)">Add one</button>
-<button type="button" wire:click="save('draft')">Save draft</button>
+<button type="button" conduit:click="increment">+</button>
+<button type="button" conduit:click="add(1)">Add one</button>
+<button type="button" conduit:click="save('draft')">Save draft</button>
 ```
 
 | Directive | Notes |

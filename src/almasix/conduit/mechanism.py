@@ -98,9 +98,13 @@ def wrap_root(component: Component, html: str, snap: dict[str, Any]) -> str:
         .replace('"', "&quot;")
     )
     stripped = html.strip()
+    name = component.conduit_name
+    # Dual vocabulary: emit both conduit:* and wire:* structural attrs.
     attrs = (
-        f' wire:id="{cid}" wire:name="{component.conduit_name}"'
-        f' data-conduit wire:initial-data="{encoded}"'
+        f' conduit:id="{cid}" wire:id="{cid}"'
+        f' conduit:name="{name}" wire:name="{name}"'
+        f" data-conduit"
+        f' conduit:initial-data="{encoded}" wire:initial-data="{encoded}"'
     )
     if stripped.startswith("<") and ">" in stripped:
         gt = stripped.index(">")
@@ -134,9 +138,11 @@ def _embed_lazy(component: Component, *, defer: bool = False) -> str:
     cid = component.conduit_id or new_id()
     component.conduit_id = cid
     mode = "defer" if defer else "lazy"
+    name = component.conduit_name
     return (
-        f'<div wire:id="{cid}" wire:name="{component.conduit_name}" '
-        f'wire:{mode}="true" data-conduit>{body}</div>'
+        f'<div conduit:id="{cid}" wire:id="{cid}"'
+        f' conduit:name="{name}" wire:name="{name}"'
+        f' conduit:{mode}="true" wire:{mode}="true" data-conduit>{body}</div>'
     )
 
 
