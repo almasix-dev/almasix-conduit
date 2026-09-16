@@ -5,6 +5,10 @@ description: Build a counter component end-to-end and understand why Conduit fee
 
 Let’s build the classic counter — small enough to fit in your head, complete enough to show the whole loop.
 
+Prefer a full app shell? Scaffold with the [Web starter kit](https://docs.almasix.com/starter-kits/)
+(`pip install almasix-starter-kit-web` then `almasix new myapp --kit web`) — Prism + Conduit auth,
+settings, and teams out of the box.
+
 ## 1. The component
 
 ```python title="app/conduit/counter.py"
