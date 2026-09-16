@@ -1,35 +1,91 @@
 ---
 title: Conduit
-description: Livewire 4–class reactive components for Almasix — Prism views, Alpine $wire, morph updates that feel like pure JS.
+description: Server-driven reactive components for Almasix — Prism views, wire:* directives, Alpine $wire, and morph updates that feel like pure JS.
 ---
 
-**Conduit** (`almasix.conduit`) is Almasix’s Livewire-class stack, targeting **Livewire 4**
-semantics: server-driven components that render Prism templates, talk over a
-CSRF-safe wire protocol, and interop with Alpine.js via `$wire`.
+**Conduit** is how you build interactive UI in [Almasix](https://github.com/almasix-dev/almasix) without leaving Python.
 
-```python title="examples/conduit.py"
+Write a component class. Render a Prism template. Sprinkle `wire:*` attributes in the HTML. Conduit keeps server state and the browser in sync — clicks, forms, typing, the whole dance — over a signed, CSRF-safe wire protocol. Pair it with Alpine.js when you want a little client-side sparkle, and `$wire` bridges the two worlds.
+
+:::tip[A nod to Livewire]
+Conduit stands on the shoulders of [Livewire](https://livewire.laravel.com/) — Caleb Porzio’s beautiful architecture was a huge inspiration. We’re our own package for the Almasix/Python world, with our own security story and DX. Same *idea*, our *house*.
+:::
+
+## The idea in thirty seconds
+
+```python title="app/conduit/counter.py"
+from almasix.conduit import Component
+
+class Counter(Component):
+    count = 0
+
+    def increment(self) -> None:
+        self.count += 1
+
+    def render(self) -> str:
+        return "conduit.counter"
+```
+
+```html title="resources/views/conduit/counter.prism.html"
+<div>
+  <h1 wire:text="count">{{ count }}</h1>
+  <button type="button" wire:click="increment">+</button>
+</div>
+```
+
+```html title="resources/views/layouts/app.prism.html"
+@conduitScripts
+@conduit('counter')
+```
+
+Click the button. Conduit posts a tiny update, runs `increment()` on the server, and morphs the DOM. The `wire:text` binding updates instantly from local memo so it *feels* like JavaScript — even though the truth still lives in Python.
+
+That’s the whole game: **server is the source of truth, the browser stays snappy**.
+
+## Why Conduit?
+
+Most “interactive” apps today split the world in two: a JSON API on one side, a frontend framework on the other, and a pile of glue in between. Conduit collapses that for the common case.
+
+- **One language for the feature** — state, validation, and actions live in a Python class.
+- **HTML you already know** — `wire:click`, `wire:model`, `wire:submit`. No build step required to get started.
+- **Optimistic bindings** — `wire:text`, `wire:show`, and `wire:bind:*` update from client memo *before* the morph lands.
+- **Alpine when you want it** — `$wire` lets Alpine read and call into your component without a second state store.
+- **Secure by default** — CSRF plus **signed** update URLs (HMAC + expiry). Tampered snapshots get a hard no.
+
+## A taste of Alpine
+
+Conduit ships Alpine alongside its script (or you bundle your own). Inside a component, `$wire` is your component:
+
+```html title="resources/views/conduit/counter.prism.html"
+<div x-data="{ hovering: false }" @mouseenter="hovering = true" @mouseleave="hovering = false">
+  <p>
+    Count is <span x-text="$wire.count"></span>
+    <span x-show="hovering" x-transition>(hover tip from Alpine)</span>
+  </p>
+  <button type="button" @click="$wire.increment()">+</button>
+  <button type="button" @click="$wire.count = 0">Reset locally + sync</button>
+</div>
+```
+
+Local Alpine state (`hovering`) stays in the browser. Server state (`count`) stays on `$wire`. They play nicely together — that’s the point.
+
+## Package
+
+Install [`almasix-conduit`](https://pypi.org/project/almasix-conduit/) (or the `almasix[conduit]` extra). The import path is always:
+
+```python
 from almasix.conduit import Component, Conduit, conduit
 ```
 
-The HTML attribute vocabulary stays **`wire:*`** (same as Livewire) so muscle
-memory and docs transfer. The Python package is published separately as
-[`almasix-conduit`](https://pypi.org/project/almasix-conduit/) — import path
-stays `from almasix.conduit import …`. After installing, register a component and
-browse a page that embeds it with `@conduit`.
-
-:::note[Livewire 4 parity]
-Every row in the [parity matrix](/livewire-parity/) is **complete**
-(`almasix.conduit.parity.PARITY`). Named deviations (e.g. signed update URLs —
-stricter than Livewire) are documented under [Configuration](/configuration/).
-:::
+The service provider registers itself via the `almasix.providers` entry point. Drop `@conduitScripts` in your layout, embed components with `@conduit('name')` or `conduit("name")`, and you’re off.
 
 ## Guide
 
-- [Installation](/installation/) — `pip install 'almasix[conduit]'` or `almasix-conduit`
-- [Quick start](/quick-start/) — counter component, `@conduit`, happy-path UX
-- [Components](/components/) — state, lifecycle, actions, validation, nesting
-- [Wire protocol](/wire-protocol/) — update endpoint, checksums, assets
-- [Directives](/directives/) — Livewire `wire:*` vocabulary
-- [Alpine and islands](/alpine-and-islands/) — `$wire` magics and scoped morph
-- [Configuration](/configuration/) — signed URLs, subpaths, `config/conduit.py`
-- [Livewire parity](/livewire-parity/) — feature matrix
+- [Installation](/installation/) — install, publish config & assets
+- [Quick start](/quick-start/) — counter end-to-end, and why it feels fast
+- [Components](/components/) — state, lifecycle, actions, validation, nesting, lazy
+- [Directives](/directives/) — the full `wire:*` vocabulary with examples
+- [Alpine and islands](/alpine-and-islands/) — `$wire`, `$errors`, `$entangle`, scoped morph
+- [Wire protocol](/wire-protocol/) — what goes over the wire
+- [Configuration](/configuration/) — signed URLs, subpaths, knobs
+- [Features](/features/) — what’s in the box

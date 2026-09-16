@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "almasix-conduit"
 version = "0.1.0"
-description = "Livewire-parity reactive components for Almasix (almasix.conduit)"
+description = "Reactive server-driven components for Almasix (almasix.conduit)"
 requires-python = ">=3.11"
 dependencies = [
     "almasix>=0.6.0",
@@ -28,7 +28,7 @@ conduit = "almasix.conduit.provider:ConduitServiceProvider"
 [project.urls]
 Homepage = "https://github.com/almasix-dev/almasix-conduit"
 Repository = "https://github.com/almasix-dev/almasix-conduit"
-Documentation = "https://almasix-dev.github.io/almasix/conduit/"
+Documentation = "https://conduit.almasix.com/"
 Issues = "https://github.com/almasix-dev/almasix-conduit/issues"
 
 [tool.hatch.build.targets.wheel]

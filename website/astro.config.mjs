@@ -12,7 +12,7 @@ export default defineConfig({
 		starlight({
 			title: 'Conduit',
 			description:
-				'Livewire 4–class reactive components for Almasix — Prism views, Alpine $wire, morph updates that feel like pure JS.',
+				'Server-driven reactive components for Almasix — Prism views, Alpine $wire, morph updates that feel like pure JS.',
 			logo: {
 				light: './src/assets/almasix-banner-light.svg',
 				dark: './src/assets/almasix-banner-dark.svg',
@@ -82,7 +82,7 @@ export default defineConfig({
 						{ label: 'Directives', slug: 'directives' },
 						{ label: 'Alpine and islands', slug: 'alpine-and-islands' },
 						{ label: 'Configuration', slug: 'configuration' },
-						{ label: 'Livewire parity', slug: 'livewire-parity' },
+						{ label: 'Features', slug: 'features' },
 					],
 				},
 			],
