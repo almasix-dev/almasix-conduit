@@ -2,15 +2,17 @@
 
 Starlight docs in this `website/` directory deploy as Worker static assets.
 
-## Secrets (repo Actions)
+## CI vs deploy
 
-| Secret | Purpose |
-|--------|---------|
-| `CLOUDFLARE_API_TOKEN` | Workers Scripts Edit + Account read |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account id |
+GitHub Actions builds only (no API tokens). **Deploy** is Cloudflare Workers Builds:
 
-## Cutover
+| Setting | Value |
+|---------|--------|
+| Root directory | `website/` |
+| Build command | `npm ci && npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Project name | `almasix-conduit-docs` |
 
-1. Merge a PR that includes this Wrangler config; confirm deploy succeeds.
-2. Workers & Pages → `almasix-conduit-docs` → Custom domains → add `conduit.almasix.com`.
+1. Connect Workers Builds to this repo with the settings above.
+2. Custom domains → add `conduit.almasix.com`.
 3. Verify: `curl -I https://conduit.almasix.com/`
