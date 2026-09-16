@@ -56,6 +56,10 @@ Route.conduit("/dashboard", Dashboard)
 
 Visit `/dashboard`. Conduit resolves the component, embeds it into `layouts.app` as `slot`, and the page is live. No separate controller action required.
 
+:::tip[Dual vocabulary]
+Examples here use `conduit:` and `$conduit`. `wire:` and `$wire` are fully supported aliases — same behavior.
+:::
+
 :::note[Scripts]
 Put `@conduitScripts` in your layout (once) — that’s the happy path. If a layout forgets them, Conduit **safety-nets** and injects assets before `</head>` (or `</body>`). The emergency fallback shell (missing layout) also injects automatically.
 :::
@@ -201,8 +205,8 @@ class UsersIndex(Component):
 
 ```html title="resources/views/conduit/users-index.prism.html"
 <div>
-  <form wire:submit="search">
-    <input type="search" wire:model.live.debounce.300ms="query" value="{{ query }}">
+  <form conduit:submit="search">
+    <input type="search" conduit:model.live.debounce.300ms="query" value="{{ query }}">
     <button type="submit">Search</button>
   </form>
   <!-- list + pagination … -->
@@ -218,8 +222,8 @@ The page is still normal Conduit HTML — nest freely:
 ```html title="resources/views/conduit/settings.prism.html"
 <div>
   <h1>Settings</h1>
-  @conduit('forms.profile', user_id=user_id)
-  @conduit('forms.password')
+  <conduit:forms.profile :user_id="user_id" />
+  <conduit:forms.password />
 </div>
 ```
 
@@ -237,7 +241,7 @@ class Settings(Component):
 Route.conduit("/settings/{user_id}", Settings)
 ```
 
-Each child gets its own snapshot and wire root. Parent and children talk through events / shared props you pass at embed time.
+Each child gets its own snapshot and component root. Parent and children talk through events / shared props you pass at embed time.
 
 ## Islands on a full page
 
@@ -246,28 +250,28 @@ Big dashboards: keep chrome stable, refresh a region:
 ```html
 <div>
   <header>…</header>
-  <div wire:island="stats">
-    <span wire:text="visits">{{ visits }}</span>
+  <div conduit:island="stats">
+    <span conduit:text="visits">{{ visits }}</span>
   </div>
-  <button type="button" wire:click="refreshStats" wire:island="stats">Refresh</button>
+  <button type="button" conduit:click="refreshStats" conduit:island="stats">Refresh</button>
 </div>
 ```
 
-Or from Alpine on the same page: `$wire.$island('stats')`. See [Alpine and islands](/alpine-and-islands/).
+Or from Alpine on the same page: `$conduit.$island('stats')`. See [Alpine and islands](/alpine-and-islands/).
 
 ## Alpine on a full-page root
 
-Same rules as embeds — `$wire` is the page component:
+Same rules as embeds — `$conduit` is the page component:
 
 ```html
 <div x-data="{ sidebar: true }">
   <aside x-show="sidebar" x-transition>…</aside>
   <button type="button" @click="sidebar = !sidebar">Menu</button>
-  <button type="button" @click="$wire.refresh()">Reload data</button>
+  <button type="button" @click="$conduit.refresh()">Reload data</button>
 </div>
 ```
 
-Local Alpine state for UI chrome; `$wire` for anything that must survive a refresh or hit the server.
+Local Alpine state for UI chrome; `$conduit` for anything that must survive a refresh or hit the server.
 
 ## Inline HTML `render()` (sketch mode)
 
@@ -280,8 +284,8 @@ class Hello(Component):
     def render(self) -> str:
         return """
         <div>
-          <h1>Hello, <span wire:text="name">{{ name }}</span></h1>
-          <input wire:model.live="name" value="{{ name }}">
+          <h1>Hello, <span conduit:text="name">{{ name }}</span></h1>
+          <input conduit:model.live="name" value="{{ name }}">
         </div>
         """
 
@@ -328,11 +332,11 @@ GET /dashboard
   → Route.conduit action (mount_full_page)
   → resolve component class
   → Conduit.component(name, **public props from route/params)
-  → embed_component → HTML with wire:id / snapshot
+  → embed_component → HTML with conduit:id (+ wire:id alias) / snapshot
   → render layout(slot=…, title=…)
   → HTML response
 
-Later clicks / $wire calls
+Later clicks / $conduit calls
   → same POST /conduit/update protocol as any embed
 ```
 
@@ -344,6 +348,6 @@ Full-page isn’t a different runtime. It’s the same Conduit component, promot
 2. Layout includes `@conduitScripts` and `{{ slot }}`
 3. `Route.conduit("/path", Component)` (optional `layout`, `title`, `params`)
 4. Lock sensitive props; use `query_string` for shareable filters
-5. Nest `@conduit` / islands / Alpine as needed
+5. Nest `<conduit:…>` / islands / Alpine as needed
 
-Next: [Directives](/directives/) for the `wire:*` vocabulary on the page, or [Alpine and islands](/alpine-and-islands/) for `$wire` patterns on full-page roots.
+Next: [Directives](/directives/) for the `conduit:*` vocabulary on the page, or [Alpine and islands](/alpine-and-islands/) for `$conduit` patterns on full-page roots.
