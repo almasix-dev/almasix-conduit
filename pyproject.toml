@@ -26,10 +26,10 @@ dev = [
 conduit = "almasix.conduit.provider:ConduitServiceProvider"
 
 [project.urls]
-Homepage = "https://github.com/almasix-dev/conduit"
-Repository = "https://github.com/almasix-dev/conduit"
+Homepage = "https://github.com/almasix-dev/almasix-conduit"
+Repository = "https://github.com/almasix-dev/almasix-conduit"
 Documentation = "https://almasix-dev.github.io/almasix/conduit/"
-Issues = "https://github.com/almasix-dev/conduit/issues"
+Issues = "https://github.com/almasix-dev/almasix-conduit/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/almasix"]

@@ -25,7 +25,7 @@ class Counter(Component):
 `ConduitServiceProvider` is discovered automatically via the `almasix.providers`
 entry-point group when this package is installed.
 
-Framework docs: [Conduit](https://almasix-dev.github.io/almasix/conduit/).
+Framework docs: [Conduit](https://conduit.almasix.com/).
 
 ## Develop
 

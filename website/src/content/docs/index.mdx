@@ -1,0 +1,35 @@
+---
+title: Conduit
+description: Livewire 4–class reactive components for Almasix — Prism views, Alpine $wire, morph updates that feel like pure JS.
+---
+
+**Conduit** (`almasix.conduit`) is Almasix’s Livewire-class stack, targeting **Livewire 4**
+semantics: server-driven components that render Prism templates, talk over a
+CSRF-safe wire protocol, and interop with Alpine.js via `$wire`.
+
+```python title="examples/conduit.py"
+from almasix.conduit import Component, Conduit, conduit
+```
+
+The HTML attribute vocabulary stays **`wire:*`** (same as Livewire) so muscle
+memory and docs transfer. The Python package is published separately as
+[`almasix-conduit`](https://pypi.org/project/almasix-conduit/) — import path
+stays `from almasix.conduit import …`. After installing, register a component and
+browse a page that embeds it with `@conduit`.
+
+:::note[Livewire 4 parity]
+Every row in the [parity matrix](/livewire-parity/) is **complete**
+(`almasix.conduit.parity.PARITY`). Named deviations (e.g. signed update URLs —
+stricter than Livewire) are documented under [Configuration](/configuration/).
+:::
+
+## Guide
+
+- [Installation](/installation/) — `pip install 'almasix[conduit]'` or `almasix-conduit`
+- [Quick start](/quick-start/) — counter component, `@conduit`, happy-path UX
+- [Components](/components/) — state, lifecycle, actions, validation, nesting
+- [Wire protocol](/wire-protocol/) — update endpoint, checksums, assets
+- [Directives](/directives/) — Livewire `wire:*` vocabulary
+- [Alpine and islands](/alpine-and-islands/) — `$wire` magics and scoped morph
+- [Configuration](/configuration/) — signed URLs, subpaths, `config/conduit.py`
+- [Livewire parity](/livewire-parity/) — feature matrix
