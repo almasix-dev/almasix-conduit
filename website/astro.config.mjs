@@ -71,10 +71,10 @@ export default defineConfig({
 				},
 			],
 			sidebar: [
+				{ label: 'Home', slug: 'index' },
 				{
 					label: 'Conduit',
 					items: [
-						{ label: 'Introduction', slug: 'index' },
 						{ label: 'Installation', slug: 'installation' },
 						{ label: 'Quick start', slug: 'quick-start' },
 						{ label: 'Components', slug: 'components' },
