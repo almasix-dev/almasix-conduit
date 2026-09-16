@@ -21,10 +21,10 @@ export default defineConfig({
 			},
 			favicon: '/favicon.svg',
 			social: [
-				{ icon: 'github', label: 'GitHub', href: 'https://github.com/almasix-dev/conduit' },
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/almasix-dev/almasix-conduit' },
 			],
 			editLink: {
-				baseUrl: 'https://github.com/almasix-dev/conduit/edit/main/website/',
+				baseUrl: 'https://github.com/almasix-dev/almasix-conduit/edit/main/website/',
 			},
 			customCss: ['./src/styles/custom.css'],
 			components: {

@@ -5,7 +5,7 @@ description: Install almasix-conduit and publish optional config and assets.
 
 Conduit is the separate package
 [`almasix-conduit`](https://pypi.org/project/almasix-conduit/)
-from [`almasix-dev/conduit`](https://github.com/almasix-dev/conduit).
+from [`almasix-dev/conduit`](https://github.com/almasix-dev/almasix-conduit).
 Install via the Almasix extra or the package directly:
 
 ```bash title="terminal"
