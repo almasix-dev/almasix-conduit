@@ -3,7 +3,15 @@ title: Features
 description: What’s in the Conduit box — directives, Alpine, security, islands, uploads, and more.
 ---
 
-A tour of what ships with Conduit today. If you’re skimming for “does it do X?”, this is the page.
+A tour of what ships with Conduit **0.2**. If you’re skimming for “does it do X?”, this is the page.
+
+## Embedding
+
+- `@conduit('name')` / `@conduitScripts`
+- Python `conduit("name", **props)`
+- **`<conduit:name />` tags** (and `<flux:…>` alias) — see [Embedding](/embedding/)
+- Dual **`conduit:` / `wire:`** attribute vocabulary
+- Alpine **`$conduit` and `$wire`** (same proxy)
 
 ## Interactivity
 
@@ -18,9 +26,9 @@ A tour of what ships with Conduit today. If you’re skimming for “does it do 
 
 ## Alpine.js
 
-- `$wire` and `$errors` magics registered on `alpine:init`
+- `$wire` / `$conduit` and `$errors` magics registered on `alpine:init`
 - Helpers: `$set`, `$toggle`, `$refresh`, `$dispatch`, `$island`, `$entangle`
-- Server `js()` expressions run against `$wire` after the response
+- Server `js()` expressions run against `$wire` / `$conduit` after the response
 - Optional CSP-safe Alpine via `conduit.csp_safe`
 
 See [Alpine and islands](/alpine-and-islands/) for practical recipes.
@@ -35,7 +43,7 @@ See [Alpine and islands](/alpine-and-islands/) for practical recipes.
 - Query-string binding
 - Islands (`wire:island`, `island_views`, `$wire.$island`)
 - Inline HTML `render()` for tiny self-contained demos
-- Full-page components via `Route.conduit()`
+- Full-page components via `Route.conduit()` — see [Full-page components](/full-page-components/)
 - `WithPagination`, `Locked`, and related helpers (`Computed`, `On`, `Modelable`)
 - File uploads (`/conduit/upload`)
 - `smith make:conduit` scaffolding

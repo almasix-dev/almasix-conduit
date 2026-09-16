@@ -1,4 +1,4 @@
-"""Conduit — Livewire 4-class reactive components for Almasix.
+"""Conduit — reactive server-driven components for Almasix.
 
 Import::
 

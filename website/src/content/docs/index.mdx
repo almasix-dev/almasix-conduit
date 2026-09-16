@@ -28,14 +28,14 @@ class Counter(Component):
 
 ```html title="resources/views/conduit/counter.prism.html"
 <div>
-  <h1 wire:text="count">{{ count }}</h1>
-  <button type="button" wire:click="increment">+</button>
+  <h1 conduit:text="count">{{ count }}</h1>
+  <button type="button" conduit:click="increment">+</button>
 </div>
 ```
 
 ```html title="resources/views/layouts/app.prism.html"
 @conduitScripts
-@conduit('counter')
+<conduit:counter />
 ```
 
 Click the button. Conduit posts a tiny update, runs `increment()` on the server, and morphs the DOM. The `wire:text` binding updates instantly from local memo so it *feels* like JavaScript — even though the truth still lives in Python.
@@ -59,11 +59,11 @@ Conduit ships Alpine alongside its script (or you bundle your own). Inside a com
 ```html title="resources/views/conduit/counter.prism.html"
 <div x-data="{ hovering: false }" @mouseenter="hovering = true" @mouseleave="hovering = false">
   <p>
-    Count is <span x-text="$wire.count"></span>
+    Count is <span x-text="$conduit.count"></span>
     <span x-show="hovering" x-transition>(hover tip from Alpine)</span>
   </p>
-  <button type="button" @click="$wire.increment()">+</button>
-  <button type="button" @click="$wire.count = 0">Reset locally + sync</button>
+  <button type="button" @click="$conduit.increment()">+</button>
+  <button type="button" @click="$conduit.count = 0">Reset locally + sync</button>
 </div>
 ```
 
@@ -77,15 +77,17 @@ Install [`almasix-conduit`](https://pypi.org/project/almasix-conduit/) (or the `
 from almasix.conduit import Component, Conduit, conduit
 ```
 
-The service provider registers itself via the `almasix.providers` entry point. Drop `@conduitScripts` in your layout, embed components with `@conduit('name')` or `conduit("name")`, and you’re off.
+The service provider registers itself via the `almasix.providers` entry point. Drop `@conduitScripts` in your layout, embed with `<conduit:name />` or `@conduit('name')`, and you’re off.
 
 ## Guide
 
 - [Installation](/installation/) — install, publish config & assets
 - [Quick start](/quick-start/) — counter end-to-end, and why it feels fast
+- [Embedding](/embedding/) — `<conduit:…>`, `@conduit`, dual `conduit:` / `wire:` vocabulary
 - [Components](/components/) — state, lifecycle, actions, validation, nesting, lazy
-- [Directives](/directives/) — the full `wire:*` vocabulary with examples
-- [Alpine and islands](/alpine-and-islands/) — `$wire`, `$errors`, `$entangle`, scoped morph
+- [Full-page components](/full-page-components/) — `Route.conduit`, layouts, params, query strings
+- [Directives](/directives/) — the full `conduit:` / `wire:` vocabulary with examples
+- [Alpine and islands](/alpine-and-islands/) — `$conduit` / `$wire`, `$errors`, `$entangle`, scoped morph
 - [Wire protocol](/wire-protocol/) — what goes over the wire
 - [Configuration](/configuration/) — signed URLs, subpaths, knobs
 - [Features](/features/) — what’s in the box

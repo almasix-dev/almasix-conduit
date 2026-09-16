@@ -39,17 +39,17 @@ Public class attributes (`count`, `label`) become **public state** — snapshott
 
 ```html title="resources/views/conduit/counter.prism.html"
 <div>
-  <h1 wire:text="count">{{ count }}</h1>
+  <h1 conduit:text="count">{{ count }}</h1>
 
-  <button type="button" wire:click="decrement" data-loading>−</button>
-  <button type="button" wire:click="increment" data-loading>+</button>
-  <button type="button" wire:click="reset">Reset</button>
+  <button type="button" conduit:click="decrement" data-loading>−</button>
+  <button type="button" conduit:click="increment" data-loading>+</button>
+  <button type="button" conduit:click="reset">Reset</button>
 
   <label>
     Label
-    <input type="text" wire:model.live="label" value="{{ label }}">
+    <input type="text" conduit:model.live="label" value="{{ label }}">
   </label>
-  <p>Hello, <span wire:text="label">{{ label }}</span>!</p>
+  <p>Hello, <span conduit:text="label">{{ label }}</span>!</p>
 </div>
 ```
 
@@ -57,9 +57,9 @@ A few things happening here:
 
 | Attribute | What it does |
 | --- | --- |
-| `wire:click="increment"` | Calls `Counter.increment()` on the server |
-| `wire:text="count"` | Keeps the heading’s text in sync with `count` on the client *and* after morph |
-| `wire:model.live="label"` | Syncs the input on every keystroke (coalesced into one request) |
+| `conduit:click="increment"` | Calls `Counter.increment()` on the server |
+| `conduit:text="count"` | Keeps the heading’s text in sync with `count` on the client *and* after morph |
+| `conduit:model.live="label"` | Syncs the input on every keystroke (coalesced into one request) |
 | `data-loading` | Lets CSS react while a request is in flight |
 
 Server-rendered `{{ count }}` is the first paint. After that, Conduit owns the updates.
@@ -72,9 +72,11 @@ In a layout (scripts once):
 @conduitScripts
 ```
 
-On a page:
+On a page — pick your favorite embed style:
 
 ```html title="resources/views/pages/home.prism.html"
+<conduit:counter />
+<!-- or -->
 @conduit('counter')
 ```
 
