@@ -1,7 +1,9 @@
 # almasix-conduit
 
-Livewire-parity reactive components for [Almasix](https://github.com/almasix-dev/almasix).
+Server-driven reactive components for [Almasix](https://github.com/almasix-dev/almasix).
 Import path stays `almasix.conduit` (namespace package under the core `almasix` dist).
+
+Inspired by [Livewire](https://livewire.laravel.com/)’s architecture — thank you, Caleb — Conduit is its own package for the Almasix/Python world.
 
 ```bash
 pip install 'almasix[conduit]'
@@ -25,7 +27,7 @@ class Counter(Component):
 `ConduitServiceProvider` is discovered automatically via the `almasix.providers`
 entry-point group when this package is installed.
 
-Framework docs: [Conduit](https://conduit.almasix.com/).
+Docs: [conduit.almasix.com](https://conduit.almasix.com/).
 
 ## Develop
 
