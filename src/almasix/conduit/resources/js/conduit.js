@@ -142,6 +142,11 @@
     for (let i = fromAttrs.length - 1; i >= 0; i--) {
       const name = fromAttrs[i].name;
       const rest = stripPrefix(name);
+      // Alpine owns visibility (x-show / x-cloak). Stripping client `style` or
+      // re-adding `x-cloak` after Alpine removed it un-hides dropdowns/panels.
+      if (name === "style" || name === "x-cloak") {
+        continue;
+      }
       if (
         !toEl.hasAttribute(name) &&
         rest !== "id" &&
@@ -154,6 +159,7 @@
     for (const a of toEl.attributes) {
       const rest = stripPrefix(a.name);
       if (rest === "initial-data") continue;
+      if (a.name === "style" || a.name === "x-cloak") continue;
       if (fromEl.getAttribute(a.name) !== a.value) {
         fromEl.setAttribute(a.name, a.value);
       }
