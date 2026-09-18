@@ -117,7 +117,7 @@ Use Conduit for the flash message content; Alpine for the fade and the auto-dism
 </div>
 ```
 
-Writes go through the same optimistic path as `$wire.title = …`.
+Writes go through the same `$wire` update path as `$wire.title = …` (checksum-safe: no local memo mutation before the roundtrip).
 
 ## Validation errors from Alpine
 

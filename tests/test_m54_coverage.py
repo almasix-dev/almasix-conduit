@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import inspect
 from typing import Any
 
 import pytest
@@ -241,19 +243,17 @@ def test_component_lifecycle_aliases_and_errors() -> None:
     c.call("$toggle", "flag")
     assert c.flag is False
 
-    def ago(self) -> str:
-        return "__coro__"
+    async def ago(self) -> str:
+        return "awaited"
 
     c.ago = ago.__get__(c, type(c))  # type: ignore[method-assign]
-    import almasix.conduit.component as comp_mod
+    coro = c.call("ago")
+    assert inspect.iscoroutine(coro)
+    assert asyncio.run(coro) == "awaited"
 
-    real_iscoro = comp_mod.inspect.iscoroutine
-    comp_mod.inspect.iscoroutine = lambda obj: obj == "__coro__" or real_iscoro(obj)  # type: ignore[method-assign]
-    try:
-        with pytest.raises(TypeError, match="synchronous"):
-            c.call("ago")
-    finally:
-        comp_mod.inspect.iscoroutine = real_iscoro  # type: ignore[method-assign]
+    c.redirect("/next", navigate=True)
+    assert c.take_redirect() == {"url": "/next", "navigate": True}
+    assert c.take_redirect() is None
 
     with pytest.raises(NotImplementedError):
         Component().render()
@@ -626,6 +626,30 @@ async def test_handle_update_branches() -> None:
         assert "label" in data["effects"].get("errors", {}) or "label" in data["serverMemo"].get(
             "errors", {}
         )
+
+        class Redirector(_Html):
+            async def go(self) -> None:
+                self.redirect("/admin/posts", navigate=True)
+
+        Conduit.register("redir", Redirector)
+        rc = Conduit.component("redir")
+        rc.conduit_id = "r1"
+        rc.conduit_name = "redir"
+        rsnap = snapshot(rc)
+        redirected = await handle_update(
+            _Req(
+                {
+                    "fingerprint": {"name": "redir", "id": "r1", "path": "/"},
+                    "serverMemo": rsnap["serverMemo"],
+                    "calls": [{"method": "go"}],
+                }
+            )
+        )
+        redir_body = body(redirected)
+        assert redir_body["effects"]["redirect"] == {
+            "url": "/admin/posts",
+            "navigate": True,
+        }
 
         # Batch components list
         batch = await handle_update(
