@@ -107,11 +107,27 @@
     return APP_BASE + path;
   }
 
+  function cookieValue(name) {
+    const prefix = name + "=";
+    const parts = String(document.cookie || "").split("; ");
+    for (let i = 0; i < parts.length; i++) {
+      if (parts[i].indexOf(prefix) === 0) {
+        return decodeURIComponent(parts[i].slice(prefix.length));
+      }
+    }
+    return "";
+  }
+
   function csrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
-    if (meta) return meta.getAttribute("content") || "";
+    if (meta) {
+      const fromMeta = meta.getAttribute("content") || "";
+      if (fromMeta) return fromMeta;
+    }
     const input = document.querySelector('input[name="_token"]');
-    return input ? input.value : "";
+    if (input && input.value) return input.value;
+    // Laravel / Almasix SPA parity: readable XSRF-TOKEN cookie.
+    return cookieValue("XSRF-TOKEN");
   }
 
   function parseInitial(el) {
@@ -299,14 +315,19 @@
       calls,
       island,
     };
+    const token = csrfToken();
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-Conduit": "true",
+    };
+    if (token) {
+      headers["X-CSRF-TOKEN"] = token;
+      headers["X-XSRF-TOKEN"] = token;
+    }
     const res = await fetch(withBase(currentEndpoint()), {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "X-CSRF-TOKEN": csrfToken(),
-        "X-Conduit": "true",
-      },
+      headers,
       credentials: "same-origin",
       body: JSON.stringify(body),
     });
@@ -386,7 +407,13 @@
       return;
     }
     const effects = result.effects || {};
-    if (effects.data && snapshot) {
+    // Prefer the full server memo (includes a fresh checksum). Only patch
+    // data/errors when the server omitted serverMemo.
+    if (result.serverMemo && snapshot) {
+      snapshot.serverMemo = result.serverMemo;
+      if (result.fingerprint) snapshot.fingerprint = result.fingerprint;
+      el.__conduitSnapshot = snapshot;
+    } else if (effects.data && snapshot) {
       snapshot.serverMemo.data = effects.data;
       if (effects.errors) snapshot.serverMemo.errors = effects.errors;
     }
@@ -404,6 +431,31 @@
       const meta = document.querySelector('meta[name="conduit-endpoint"]');
       if (meta) meta.setAttribute("content", effects.endpoint);
       if (window.__CONDUIT__) window.__CONDUIT__.endpoint = effects.endpoint;
+    }
+    if (effects.redirect && effects.redirect.url) {
+      const url = withBase(String(effects.redirect.url));
+      if (effects.redirect.navigate) {
+        // Soft navigate: fall through to click-handler style fetch below.
+        fetch(url, { headers: { "X-Conduit-Navigate": "true", Accept: "text/html" }, credentials: "same-origin" })
+          .then((r) => r.text())
+          .then((html) => {
+            const doc = new DOMParser().parseFromString(html, "text/html");
+            const nextMain = doc.querySelector("[data-conduit-navigate]") || doc.body;
+            const curMain = document.querySelector("[data-conduit-navigate]") || document.body;
+            if (curMain && nextMain && curMain !== document.body) {
+              curMain.innerHTML = nextMain.innerHTML;
+            } else {
+              document.body.innerHTML = doc.body.innerHTML;
+            }
+            document.title = doc.title;
+            history.pushState({}, "", url);
+            bootAll(document);
+            syncOffline();
+          });
+      } else {
+        window.location.assign(url);
+      }
+      return;
     }
     (effects.dispatches || []).forEach((d) => {
       if (d.event === "__js" && d.params && d.params.expr) {
@@ -438,11 +490,8 @@
               enqueue(el, snapshot, { calls: [{ method: "$refresh", params: [] }] });
           }
           if (prop === "$set") {
-            return (name, value) => {
-              snapshot.serverMemo.data[name] = value;
-              applyClientBindings(el);
-              return enqueue(el, snapshot, { updates: [[name, value]] });
-            };
+            return (name, value) =>
+              enqueue(el, snapshot, { updates: [[name, value]] });
           }
           if (prop === "$toggle") {
             return (name) =>
@@ -468,8 +517,7 @@
                 return snapshot.serverMemo.data[name];
               },
               set value(v) {
-                snapshot.serverMemo.data[name] = v;
-                applyClientBindings(el);
+                // Do not mutate checksummed memo — send an update instead.
                 enqueue(el, snapshot, { updates: [[name, v]] });
               },
             });
@@ -485,8 +533,7 @@
           };
         },
         set(_t, prop, value) {
-          snapshot.serverMemo.data[prop] = value;
-          applyClientBindings(el);
+          // Keep serverMemo.data aligned with the last checksummed snapshot.
           enqueue(el, snapshot, { updates: [[String(prop), value]] });
           return true;
         },
@@ -543,7 +590,33 @@
       form.addEventListener("submit", (e) => {
         e.preventDefault();
         const method = attr(form, "submit") || "submit";
-        enqueue(el, snapshot, { calls: [{ method, params: [] }] });
+        // Sync current field values before the action (blur may not have fired).
+        const updates = [];
+        form.querySelectorAll(modelSelector()).forEach((input) => {
+          const name =
+            attr(input, "model") ||
+            attr(input, "model.live") ||
+            attr(input, "model.blur") ||
+            attr(input, "model.change") ||
+            attr(input, "model.deep") ||
+            attr(input, "model.live.blur");
+          if (!name) return;
+          let value;
+          if (input.type === "checkbox") {
+            value = input.type === "checkbox" && input.getAttribute("value") != null && input.getAttribute("value") !== "on"
+              ? input.checked
+                ? input.value
+                : null
+              : input.checked;
+          } else if (input.type === "radio") {
+            if (!input.checked) return;
+            value = input.value;
+          } else {
+            value = input.value;
+          }
+          updates.push({ name, value });
+        });
+        enqueue(el, snapshot, { updates, calls: [{ method, params: [] }] });
       });
     });
 
@@ -573,14 +646,11 @@
       const read = () =>
         input.type === "checkbox" ? !!input.checked : input.type === "file" ? input.files : input.value;
       const push = () => {
-        const value = read();
-        snapshot.serverMemo.data[name] = value;
-        applyClientBindings(el);
-        enqueue(el, snapshot, { updates: [[name, value]] });
+        // Never mutate checksummed serverMemo.data before the roundtrip —
+        // the server verifies the memo, then applies ``updates``.
+        enqueue(el, snapshot, { updates: [[name, read()]] });
       };
       const onInput = () => {
-        snapshot.serverMemo.data[name] = read();
-        applyClientBindings(el);
         if (!live && blurOnly) return;
         if (debounceMs) {
           clearTimeout(t);

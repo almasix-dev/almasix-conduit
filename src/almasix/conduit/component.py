@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 from typing import Any, ClassVar
 
 from almasix.validation import Validator, validator
@@ -32,6 +31,7 @@ class Component:
         self.__conduit_name: str | None = None
         self.__errors: dict[str, list[str]] = {}
         self.__dispatches: list[dict[str, Any]] = []
+        self.__redirect: dict[str, Any] | None = None
         self.__skip_render = False
         self.__renderless = False
         self.__island: str | None = None
@@ -190,11 +190,7 @@ class Component:
         if not callable(fn):
             raise AttributeError(f"{type(self).__name__} has no method {method!r}")
         result = fn(*params)
-        if inspect.iscoroutine(result):
-            raise TypeError(
-                f"{type(self).__name__}.{method} must be synchronous "
-                "(use wire:click.async on the client for non-blocking UI)"
-            )
+        # Async actions are awaited by ``handle_update`` / ``_update_one``.
         return result
 
     def dispatch(self, event: str, **params: Any) -> None:
@@ -209,6 +205,16 @@ class Component:
     def js(self, expression: str) -> None:
         """Queue a JS expression to run on the client after the response (Livewire ``$js``)."""
         self.__dispatches.append({"event": "__js", "params": {"expr": expression}, "to": "self"})
+
+    def redirect(self, url: str, *, navigate: bool = False) -> None:
+        """Queue a full-page (or Conduit navigate) redirect after the response."""
+        self.__redirect = {"url": str(url), "navigate": bool(navigate)}
+        self.skip_render()
+
+    def take_redirect(self) -> dict[str, Any] | None:
+        target = self.__redirect
+        self.__redirect = None
+        return target
 
     def take_dispatches(self) -> list[dict[str, Any]]:
         items = list(self.__dispatches)

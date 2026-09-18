@@ -120,16 +120,16 @@ You wrote Python. The UI feels like a tiny SPA. That’s the win.
 
 ## Why it can feel like pure JS
 
-Conduit optimizes the **happy path** so typing and toggles don’t sit around waiting for the network to redraw:
+Conduit optimizes the **happy path** so typing and toggles don’t sit around waiting for a full redraw:
 
-1. **Client bindings** — `wire:text`, `wire:show`, and `wire:bind:*` update from `$wire` / `serverMemo.data` right after optimistic local writes.
+1. **Checksum-safe updates** — the client never mutates `serverMemo.data` before `POST`; bindings (`wire:text`, `wire:show`, `wire:bind:*`) refresh from the response memo so HMAC checksums stay valid.
 2. **Request coalescing** — updates and calls within ~16ms merge into one `POST /conduit/update`.
 3. **Idiomorph-lite morph** — patches attributes and keyed children instead of blindly replacing the root.
 4. **Islands** — `wire:island` / `$wire.$island()` scopes HTML morph to a region so the rest of the component stays put.
 5. **`.renderless`** — skip HTML when only server state or events matter.
 6. **`data-loading`** — loading hooks for CSS without extra roundtrips.
 
-Pair `wire:model.live` with `wire:text` on the same property and you get an input that feels instant while still syncing to the server.
+Pair `wire:model.live` with `wire:text` on the same property: coalescing keeps traffic light, and bindings update as soon as the roundtrip lands.
 
 ## A slightly richer example
 

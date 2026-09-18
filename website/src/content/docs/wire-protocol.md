@@ -48,8 +48,11 @@ The JSON reply includes a fresh `serverMemo` plus an `effects` object. Common ke
 | `dispatches` | Events / `$js` payloads to run |
 | `queryString` | URL query updates |
 | `endpoint` | Rotated signed update URL |
+| `redirect` | `{ url, navigate }` — full reload, or soft navigate when `navigate` is true |
 
 The client applies `data` bindings **before** morphing so the UI moves first, then patches the DOM.
+
+Do **not** rewrite `serverMemo.data` in the browser before POST — the checksum covers that bag. Send property changes as `updates` (or `$set` calls) and take the fresh memo from the response.
 
 ## Checksums
 

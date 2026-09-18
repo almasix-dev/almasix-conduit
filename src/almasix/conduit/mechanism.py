@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import inspect
 import json
 import secrets
 import uuid
@@ -176,13 +177,15 @@ async def handle_update(request: Request) -> JSONResponse:
     if not isinstance(components, list):
         return JSONResponse({"message": "Invalid components list"}, status_code=400)
 
-    results = [_update_one(entry, request) for entry in components if isinstance(entry, dict)]
+    results = [
+        await _update_one(entry, request) for entry in components if isinstance(entry, dict)
+    ]
     if len(results) == 1 and "components" not in payload:
         return JSONResponse(results[0])
     return JSONResponse({"components": results})
 
 
-def _update_one(entry: dict[str, Any], request: Request) -> dict[str, Any]:
+async def _update_one(entry: dict[str, Any], request: Request) -> dict[str, Any]:
     fingerprint = entry.get("fingerprint") or {}
     memo = entry.get("serverMemo") or {}
     updates = entry.get("updates") or []
@@ -241,7 +244,9 @@ def _update_one(entry: dict[str, Any], request: Request) -> dict[str, Any]:
             component.mount()
             continue
         try:
-            component.call(method, *list(params))
+            result = component.call(method, *list(params))
+            if inspect.iscoroutine(result):
+                await result
         except ValidationException as exc:
             component.reset_error_bag()
             for key, msgs in (exc.errors or {}).items():
@@ -259,6 +264,9 @@ def _update_one(entry: dict[str, Any], request: Request) -> dict[str, Any]:
         "dispatches": component.take_dispatches(),
         "dirty": list(component.get_public_properties().keys()),
     }
+    redirect_to = component.take_redirect()
+    if redirect_to:
+        effects["redirect"] = redirect_to
     qs = component.sync_query_string()
     if qs:
         effects["queryString"] = qs
