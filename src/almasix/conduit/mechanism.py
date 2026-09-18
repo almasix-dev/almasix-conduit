@@ -177,9 +177,7 @@ async def handle_update(request: Request) -> JSONResponse:
     if not isinstance(components, list):
         return JSONResponse({"message": "Invalid components list"}, status_code=400)
 
-    results = [
-        await _update_one(entry, request) for entry in components if isinstance(entry, dict)
-    ]
+    results = [await _update_one(entry, request) for entry in components if isinstance(entry, dict)]
     if len(results) == 1 and "components" not in payload:
         return JSONResponse(results[0])
     return JSONResponse({"components": results})
