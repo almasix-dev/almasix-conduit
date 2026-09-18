@@ -1,0 +1,92 @@
+name: Bug report
+description: Something isn't working as documented or expected.
+title: "bug: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Please fill every section you can — incomplete reports are harder to reproduce.
+
+  - type: input
+    id: conduit-version
+    attributes:
+      label: Conduit version
+      description: e.g. `0.2.1` (`pip show almasix-conduit`)
+      placeholder: "0.2.1"
+    validations:
+      required: true
+
+  - type: input
+    id: almasix-version
+    attributes:
+      label: Almasix version
+      description: Framework pin if relevant
+      placeholder: "almasix==0.6.x"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+          - Component lifecycle / nesting
+          - wire:model / forms
+          - Actions / events
+          - Redirects / navigation
+          - Alpine / frontend assets
+          - Checksum / morph / DOM
+          - Hosting / Orbit integration
+          - Docs / examples
+          - Packaging / install
+          - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Clear description of the bug.
+      placeholder: When I …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps or a small code sample.
+      placeholder: |
+        1. …
+        2. …
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, runtime, browser (if UI).
+      placeholder: |
+        - OS: Linux
+        - Python / Node: …
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / stack traces
+      render: shell
+    validations:
+      required: false
