@@ -1,8 +1,7 @@
 // @ts-check
-import { readFileSync } from 'node:fs';
-
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import almasixTheme from '@almasix/starlight-theme';
 
 export default defineConfig({
 	site: 'https://conduit.almasix.com',
@@ -26,52 +25,14 @@ export default defineConfig({
 			editLink: {
 				baseUrl: 'https://github.com/almasix-dev/almasix-conduit/edit/main/website/',
 			},
-			customCss: ['./src/styles/custom.css'],
-			components: {
-				Header: './src/components/Header.astro',
-				PageFrame: './src/components/PageFrame.astro',
-				SiteTitle: './src/components/SiteTitle.astro',
-				ThemeSelect: './src/components/ThemeSelect.astro',
-			},
-			expressiveCode: {
-				themes: ['one-dark-pro'],
-				useStarlightDarkModeSwitch: false,
-				useStarlightUiThemeColors: false,
-				// Must stay true on Astro 7 / Sätteri: inlining puts CSS in a
-				// set:html attribute, and `pre > code` in that CSS closes the
-				// <style> tag early — frames go transparent, copy chrome breaks.
-				emitExternalStylesheet: true,
-				styleOverrides: {
-					borderRadius: '0.85rem',
-					borderWidth: '1px',
-					codeFontFamily: "'JetBrains Mono', ui-monospace, monospace",
-					codeFontSize: '0.9rem',
-					codeBackground: '#282c34',
-					codeForeground: '#abb2bf',
-					frames: {
-						shadowColor: 'rgba(0, 0, 0, 0.4)',
-						editorBackground: '#282c34',
-						terminalBackground: '#282c34',
-					},
-				},
-			},
+			plugins: [
+				almasixTheme({
+					github: 'almasix-dev/almasix-conduit',
+					product: 'Conduit',
+					hubUrl: 'https://almasix.com',
+				}),
+			],
 			head: [
-				{
-					tag: 'link',
-					attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-				},
-				{
-					tag: 'link',
-					attrs: {
-						rel: 'preconnect',
-						href: 'https://fonts.gstatic.com',
-						crossorigin: true,
-					},
-				},
-				{
-					tag: 'script',
-					content: readFileSync('./src/scripts/sidebar-accordion.js', 'utf8'),
-				},
 				{
 					tag: 'meta',
 					attrs: { property: 'og:image', content: 'https://conduit.almasix.com/og.png' },
@@ -101,7 +62,6 @@ export default defineConfig({
 					attrs: { type: 'application/ld+json' },
 					content: "{\"@context\": \"https://schema.org\", \"@graph\": [{\"@type\": \"WebSite\", \"@id\": \"https://conduit.almasix.com/#website\", \"url\": \"https://conduit.almasix.com/\", \"name\": \"Almasix Conduit\", \"description\": \"Server-driven reactive components for Almasix \\u2014 Prism views, Alpine $wire, and morph updates.\", \"publisher\": {\"@id\": \"https://almasix.com/#organization\"}, \"inLanguage\": \"en\"}, {\"@type\": \"SoftwareApplication\", \"@id\": \"https://conduit.almasix.com/#software\", \"name\": \"Almasix Conduit\", \"applicationCategory\": \"DeveloperApplication\", \"url\": \"https://conduit.almasix.com/\", \"isPartOf\": {\"@id\": \"https://almasix.com/#software\"}, \"publisher\": {\"@id\": \"https://almasix.com/#organization\"}}]}",
 				},
-
 			],
 			sidebar: [
 				{ label: 'Home', slug: 'index' },
