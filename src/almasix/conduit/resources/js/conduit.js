@@ -333,6 +333,11 @@
     });
     if (!res.ok) {
       console.error("[conduit] update failed", res.status);
+      window.dispatchEvent(
+        new CustomEvent("conduit:error", {
+          detail: { status: res.status, message: `Request failed (${res.status})` },
+        })
+      );
       return null;
     }
     return res.json();
@@ -404,9 +409,18 @@
     if (!result) return;
     if (result.error) {
       console.error("[conduit]", result.error);
+      window.dispatchEvent(
+        new CustomEvent("conduit:error", { detail: { message: String(result.error) } })
+      );
       return;
     }
     const effects = result.effects || {};
+    const methodErrors = effects.errors && effects.errors._method;
+    if (methodErrors && methodErrors.length) {
+      window.dispatchEvent(
+        new CustomEvent("conduit:error", { detail: { message: String(methodErrors[0]) } })
+      );
+    }
     // Prefer the full server memo (includes a fresh checksum). Only patch
     // data/errors when the server omitted serverMemo.
     if (result.serverMemo && snapshot) {
