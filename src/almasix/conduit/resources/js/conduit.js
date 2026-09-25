@@ -333,6 +333,11 @@
     });
     if (!res.ok) {
       console.error("[conduit] update failed", res.status);
+      window.dispatchEvent(
+        new CustomEvent("conduit:error", {
+          detail: { status: res.status, message: `Request failed (${res.status})` },
+        })
+      );
       return null;
     }
     return res.json();
@@ -404,9 +409,18 @@
     if (!result) return;
     if (result.error) {
       console.error("[conduit]", result.error);
+      window.dispatchEvent(
+        new CustomEvent("conduit:error", { detail: { message: String(result.error) } })
+      );
       return;
     }
     const effects = result.effects || {};
+    const methodErrors = effects.errors && effects.errors._method;
+    if (methodErrors && methodErrors.length) {
+      window.dispatchEvent(
+        new CustomEvent("conduit:error", { detail: { message: String(methodErrors[0]) } })
+      );
+    }
     // Prefer the full server memo (includes a fresh checksum). Only patch
     // data/errors when the server omitted serverMemo.
     if (result.serverMemo && snapshot) {
@@ -432,6 +446,18 @@
       if (meta) meta.setAttribute("content", effects.endpoint);
       if (window.__CONDUIT__) window.__CONDUIT__.endpoint = effects.endpoint;
     }
+    // Dispatch before redirecting so listeners (e.g. "saved" toasts) still run.
+    (effects.dispatches || []).forEach((d) => {
+      if (d.event === "__js" && d.params && d.params.expr) {
+        try {
+          Function("$wire", "$conduit", d.params.expr)(el.__wire, el.__wire);
+        } catch (e) {
+          console.error("[conduit] $js", e);
+        }
+        return;
+      }
+      window.dispatchEvent(new CustomEvent(d.event, { detail: d.params || {} }));
+    });
     if (effects.redirect && effects.redirect.url) {
       const url = withBase(String(effects.redirect.url));
       if (effects.redirect.navigate) {
@@ -457,17 +483,6 @@
       }
       return;
     }
-    (effects.dispatches || []).forEach((d) => {
-      if (d.event === "__js" && d.params && d.params.expr) {
-        try {
-          Function("$wire", "$conduit", d.params.expr)(el.__wire, el.__wire);
-        } catch (e) {
-          console.error("[conduit] $js", e);
-        }
-        return;
-      }
-      window.dispatchEvent(new CustomEvent(d.event, { detail: d.params || {} }));
-    });
     applyClientBindings(el);
     if (effects.islands) {
       Object.entries(effects.islands).forEach(([name, html]) => morphIsland(el, name, html));
