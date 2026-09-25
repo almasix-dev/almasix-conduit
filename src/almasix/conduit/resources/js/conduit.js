@@ -446,6 +446,18 @@
       if (meta) meta.setAttribute("content", effects.endpoint);
       if (window.__CONDUIT__) window.__CONDUIT__.endpoint = effects.endpoint;
     }
+    // Dispatch before redirecting so listeners (e.g. "saved" toasts) still run.
+    (effects.dispatches || []).forEach((d) => {
+      if (d.event === "__js" && d.params && d.params.expr) {
+        try {
+          Function("$wire", "$conduit", d.params.expr)(el.__wire, el.__wire);
+        } catch (e) {
+          console.error("[conduit] $js", e);
+        }
+        return;
+      }
+      window.dispatchEvent(new CustomEvent(d.event, { detail: d.params || {} }));
+    });
     if (effects.redirect && effects.redirect.url) {
       const url = withBase(String(effects.redirect.url));
       if (effects.redirect.navigate) {
@@ -471,17 +483,6 @@
       }
       return;
     }
-    (effects.dispatches || []).forEach((d) => {
-      if (d.event === "__js" && d.params && d.params.expr) {
-        try {
-          Function("$wire", "$conduit", d.params.expr)(el.__wire, el.__wire);
-        } catch (e) {
-          console.error("[conduit] $js", e);
-        }
-        return;
-      }
-      window.dispatchEvent(new CustomEvent(d.event, { detail: d.params || {} }));
-    });
     applyClientBindings(el);
     if (effects.islands) {
       Object.entries(effects.islands).forEach(([name, html]) => morphIsland(el, name, html));

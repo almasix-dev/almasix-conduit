@@ -14,3 +14,10 @@ def test_client_dispatches_conduit_error_for_every_failure_path() -> None:
     # HTTP failure, protocol error (e.g. checksum mismatch), and uncaught call error.
     assert source.count('new CustomEvent("conduit:error"') == 3
     assert "effects.errors._method" in source
+
+
+def test_client_dispatches_events_before_redirecting() -> None:
+    source = CLIENT.read_text(encoding="utf-8")
+    assert source.index("(effects.dispatches || []).forEach") < source.index(
+        "if (effects.redirect && effects.redirect.url)"
+    )
